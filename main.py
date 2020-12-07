@@ -3,6 +3,9 @@ import configparser
 import hashlibrary
 import threading
 import logging
+import clientObject
+import jsonPacketBuilder
+import database
 
 class main:
 
@@ -21,17 +24,30 @@ class main:
 
     serverLive = False
 
+    serverClients = []
+
+    databaseManager = None
+
     def __init__(self):
 
         self.logger.setFile("log/"+self.logger.genConfigFileName())
 
         try:
             self.config.read("config.ini")
+            self.logger.log("Successfully opened config file")
         except FileNotFoundError:
-            print("Could not find configuration file, exiting")
+            self.logger.log("Could not find config file, exiting...",4)
             exit()
 
+        self.logger.log("Opening database")
+        self.databaseManager = database.Database("database/database.db","password",self.logger)
+
+
+        self.logger.log("Binding host & port and opening server")
         self.s.bind((self.host,int(self.config["Server"]["port"])))
+
+        self.logger.log("Assigned timerout to 10")
+        self.s.settimeout(10)
         self.serverLive = True
 
         self.sCThread = threading.Thread(target=self.serverClientThread)
@@ -39,7 +55,19 @@ class main:
 
     def serverClientThread(self):
         while self.serverLive:
-            pass
+
+            try:
+                client, addr = self.s.accept()
+            except TimeoutError:
+                self.logger.log("No connections within accept time, retrying",1,"Client Connection Thread")
+                continue
+
+            self.serverClients.append(clientObject.Client(addr,client))
+
+            client.send(jsonPacketBuilder.packetBuilder.simpleCode(0,"Please Authorise").encode())
+
+
+
 
 
     def databaseThread(self):

@@ -14,10 +14,13 @@ class hash(object):
     #Leftover lambda I wanted to save for use later.
 
     # This creates a list of all hashable characters, each is assigned a value based on its index in the list.
-    table = list("." + string.ascii_lowercase + string.ascii_uppercase + string.digits + string.punctuation)
+    table = list("." + string.ascii_lowercase + string.ascii_uppercase + string.digits + '!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~')
 
     # This plaintext value is used to store the plaintext version of what is being hashed, it is cleared after use
     plainText = None
+
+    def __init__(self):
+        print("Hashlib C Jessica Ampstead 2020, this is for demonstration purposes only do not use in production")
 
     def genSalt(self,length:int):
         """genSalt is a function that generates a salt value, this is a random string consisting of some of the possible
@@ -95,7 +98,7 @@ class hash(object):
         if not hold == "":
             mathTable.append(hold)
 
-        print(mathTable)
+        #print(mathTable)
 
         currNumber = list(mathTable[0])
         for i in range(1,len(mathTable)):
@@ -105,7 +108,7 @@ class hash(object):
                 newValue = int(currNumber[j]) + int(workingValue[j])
                 currNumber[j] = newValue
 
-        print(currNumber)
+        #print(currNumber)
 
         for number in currNumber:
             hashText = hashText + hex(int(number)) + "/"
