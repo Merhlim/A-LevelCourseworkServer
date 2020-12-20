@@ -4,7 +4,7 @@ import hashlibrary
 import threading
 import logging
 import clientObject
-import jsonPacketBuilder
+from jsonTools import jsonPacketBuilder, jsonPacketReader
 import database
 
 class main:
@@ -64,7 +64,18 @@ class main:
 
             self.serverClients.append(clientObject.Client(addr,client))
 
-            client.send(jsonPacketBuilder.packetBuilder.simpleCode(0,"Please Authorise").encode())
+            # Create new thread to wait for authorisation from each client to prevent one client holding up new connections.
+            authorisationThread = threading.Thread(target=self.clientAuthorisationThread,args=(client,addr))
+            authorisationThread.start()
+
+    def clientAuthorisationThread(self, client, addr):
+
+        client.send(jsonPacketBuilder.packetBuilder.simpleCode(0, "Please Authorise").encode())
+        returnedData = jsonPacketReader.packetReader.decode(client.recv(2048).decode())
+
+
+
+
 
 
 
